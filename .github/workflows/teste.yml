@@ -1,4 +1,4 @@
-name: Build Homologation
+name: Test PR & Publicar Homolog
 
 on:
   pull_request:
@@ -18,6 +18,7 @@ jobs:
           else
             echo "homolog=false" >> $GITHUB_OUTPUT
           fi
+
   validate-client:
     needs: check-homolog
     if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
@@ -28,8 +29,31 @@ jobs:
     if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
     uses: ./.github/workflows/validate-api.yml
 
-  final-step:
+  publish-homolog:
     needs: [validate-client, validate-api]
+    if: ${{ needs.check-homolog.outputs.homolog == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Todos os workflows passaram, podemos prosseguir!"
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+      - name: Rebase na master
+        run: |
+          git fetch origin master
+          git checkout ${{ github.head_ref }}
+          git rebase origin/master
+      - name: Push para a branch PR
+        run: |
+          git push origin ${{ github.head_ref }} --force-with-lease
+      - name: Publicar em homolog
+        run: |
+          git checkout master
+          git pull origin master
+          git branch -D homolog || true
+          git checkout -b homolog
+          git cherry-pick origin/${{ github.head_ref }}
+          git push origin homolog -f

@@ -18,7 +18,7 @@ jobs:
             echo "Body da PR:"
             echo "${{ github.event.pull_request.body }}"
 
-            if echo "${{ github.event.pull_request.body }}" | grep -q "\- \[x\] Enviar para homologação?"; then
+            if echo "${{ github.event.pull_request.body }}" | grep -iq "\- \[x\] Enviar para homologação?"; then
               echo "HOMOLOG=true" >> $GITHUB_ENV
             else
               echo "HOMOLOG=false" >> $GITHUB_ENV
@@ -27,11 +27,11 @@ jobs:
         - name: Validar Client
           if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
           run: |
-            echo "✅ Rodando validações do Client..."
+            echo "Rodando validações do Client..."
             echo "Client validado!"
 
         - name: Validar API
           if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
           run: |
-            echo "✅ Rodando validações da API..."
+            echo "Rodando validações da API..."
             echo "API validada!"

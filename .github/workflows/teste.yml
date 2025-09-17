@@ -1,11 +1,13 @@
-name: Test PR
+name: Build Homologation
 
 on:
   pull_request:
     types: [opened, synchronize, edited, labeled]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Workflow disparado!"
+  build-homolog:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout do código
+          uses: actions/checkout@v3

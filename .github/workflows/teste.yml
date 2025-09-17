@@ -23,3 +23,15 @@ jobs:
             else
               echo "HOMOLOG=false" >> $GITHUB_ENV
             fi
+
+        - name: Validar Client
+          if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
+          run: |
+            echo "✅ Rodando validações do Client..."
+            echo "Client validado!"
+
+        - name: Validar API
+          if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
+          run: |
+            echo "✅ Rodando validações da API..."
+            echo "API validada!"

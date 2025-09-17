@@ -7,35 +7,44 @@ on:
 jobs:
   build-homolog:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Verificar se a PR quer homologação
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Verificar checkbox de homologação
         id: check_body
         run: |
-          BODY="${{ github.event.pull_request.body }}"
-          if echo "$BODY" | grep -q "\- \[x\] Sim"; then
+          echo "Body da PR:"
+          echo "${{ github.event.pull_request.body }}"
+
+          if echo "${{ github.event.pull_request.body }}" | grep -q "\- \[x\] Sim"; then
             echo "HOMOLOG=true" >> $GITHUB_ENV
           else
             echo "HOMOLOG=false" >> $GITHUB_ENV
+          fi
 
       - name: Debug
         run: echo "Disparar workflow de homologação? $HOMOLOG"
 
-      - name: Checkout do código
-        if: ${{ env.HOMOLOG == 'true' }}
-        uses: actions/checkout@v3
-
       - name: Validar Client
         if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
         run: |
-          echo "Rodando validações do Client..."
+          echo "✅ Rodando validações do Client..."
           npm install
           npm run lint
-          # rodar testes do client
+          # Aqui você pode adicionar testes do client
+          echo "Client validado!"
 
       - name: Validar API
         if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
         run: |
-          echo "Rodando validações da API..."
+          echo "✅ Rodando validações da API..."
           npm install
           npm run lint
-          # rodar testes da API
+          # Aqui você pode adicionar testes da API
+          echo "API validada!"
+
+      - name: Mensagem final
+        if: ${{ env.HOMOLOG == 'true' }}
+        run: echo "🎉 PR pronta para homologação! Labels da PR: ${{ github.event.pull_request.labels.*.name }}"

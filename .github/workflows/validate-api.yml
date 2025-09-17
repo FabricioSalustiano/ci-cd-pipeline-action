@@ -1,12 +1,8 @@
 name: Validate API
 
 on:
-  workflow_call:
-    inputs:
-      homolog:
-        required: true
-        type: boolean
-
+  workflow_call:  
+  
 jobs:
   validate-api:
     runs-on: ubuntu-latest

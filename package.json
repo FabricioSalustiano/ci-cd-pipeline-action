@@ -1,0 +1,17 @@
+{
+  "name": "ci-cd-node-express",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.35.0",
+    "globals": "^15.12.0"
+  }
+}

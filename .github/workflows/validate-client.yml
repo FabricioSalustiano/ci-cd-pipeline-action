@@ -2,10 +2,6 @@ name: Validate Client
 
 on:
   workflow_call:
-    inputs:
-      homolog:
-        required: true
-        type: boolean
 
 jobs:
   validate-client:

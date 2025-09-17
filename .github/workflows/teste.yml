@@ -5,33 +5,32 @@ on:
     types: [opened, synchronize, edited, labeled]
 
 jobs:
-  build-homolog:
-      runs-on: ubuntu-latest
+  check-homolog:
+    runs-on: ubuntu-latest
+    outputs:
+      homolog: ${{ steps.set-homolog.outputs.homolog }}
+    steps:
+      - name: Verificar checkbox de homologação
+        id: set-homolog
+        run: |
+          if echo "${{ github.event.pull_request.body }}" | grep -iq "\- \[x\] Enviar para homologação?"; then
+            echo "homolog=true" >> $GITHUB_OUTPUT
+          else
+            echo "homolog=false" >> $GITHUB_OUTPUT
+          fi
 
-      steps:
-        - name: Checkout do código
-          uses: actions/checkout@v3
+  validate-client:
+    needs: check-homolog
+    if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
+    uses: ./.github/workflows/validate-client.yml
 
-        - name: Verificar checkbox de homologação
-          id: check_body
-          run: |
-            echo "Body da PR:"
-            echo "${{ github.event.pull_request.body }}"
+  validate-api:
+    needs: check-homolog
+    if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
+    uses: ./.github/workflows/validate-api.yml
 
-            if echo "${{ github.event.pull_request.body }}" | grep -iq "\- \[x\] Enviar para homologação?"; then
-              echo "HOMOLOG=true" >> $GITHUB_ENV
-            else
-              echo "HOMOLOG=false" >> $GITHUB_ENV
-            fi
-
-        - name: Validar Client
-          if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
-          run: |
-            echo "Rodando validações do Client..."
-            echo "Client validado!"
-
-        - name: Validar API
-          if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
-          run: |
-            echo "Rodando validações da API..."
-            echo "API validada!"
+  final-step:
+    needs: [validate-client, validate-api]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Todos os workflows passaram, podemos prosseguir!"

@@ -1,0 +1,41 @@
+name: Build Homologation
+
+on:
+  pull_request:
+    types: [opened, edited, labeled]
+
+jobs:
+  build-homolog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar se a PR quer homologação
+        id: check_body
+        run: |
+          BODY="${{ github.event.pull_request.body }}"
+          if echo "$BODY" | grep -q "\- \[x\] Sim"; then
+            echo "HOMOLOG=true" >> $GITHUB_ENV
+          else
+            echo "HOMOLOG=false" >> $GITHUB_ENV
+
+      - name: Debug
+        run: echo "Disparar workflow de homologação? $HOMOLOG"
+
+      - name: Checkout do código
+        if: ${{ env.HOMOLOG == 'true' }}
+        uses: actions/checkout@v3
+
+      - name: Validar Client
+        if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
+        run: |
+          echo "Rodando validações do Client..."
+          npm install
+          npm run lint
+          # rodar testes do client
+
+      - name: Validar API
+        if: ${{ env.HOMOLOG == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
+        run: |
+          echo "Rodando validações da API..."
+          npm install
+          npm run lint
+          # rodar testes da API

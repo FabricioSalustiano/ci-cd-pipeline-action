@@ -1,0 +1,13 @@
+name: Homologation PR Template
+about: Template para PRs que podem ser enviadas para homologação
+
+body:
+  - type: markdown
+    attributes:
+      value: "### Seleção de homologação"
+  - type: checkboxes
+    attributes:
+      label: "Enviar para homologação?"
+      options:
+        - label: "Sim"
+          required: false

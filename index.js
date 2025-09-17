@@ -7,8 +7,6 @@ app.get("/", (req, res) => {
   res.send("Hello CI/CD World");
 });
 
-console.log("Iniciando o servidor...");
-
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });

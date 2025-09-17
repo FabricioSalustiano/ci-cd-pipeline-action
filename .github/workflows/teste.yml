@@ -41,7 +41,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-      - name: Rebase na master
+      - name: Rebase na main
         run: |
           git fetch origin main
           git checkout ${{ github.head_ref }}

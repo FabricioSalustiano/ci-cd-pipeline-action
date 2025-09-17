@@ -1,4 +1,4 @@
-name: Test PR & Publicar Homolog
+name: CI-CD Homologation
 
 on:
   pull_request:
@@ -22,12 +22,12 @@ jobs:
   validate-client:
     needs: check-homolog
     if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
-    uses: ./.github/workflows/validate-client.yml
+    uses: ./.github/workflows/ci-cd.client.yml
 
   validate-api:
     needs: check-homolog
     if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
-    uses: ./.github/workflows/validate-api.yml
+    uses: ./.github/workflows/ci-cd.api.yml
 
   publish-homolog:
     needs: [validate-client, validate-api]
@@ -41,18 +41,18 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-      - name: Rebase na main
+      - name: Rebase na master
         run: |
-          git fetch origin main
+          git fetch origin master
           git checkout ${{ github.head_ref }}
-          git rebase origin/main
+          git rebase origin/master
       - name: Push para a branch PR
         run: |
           git push origin ${{ github.head_ref }} --force-with-lease
       - name: Publicar em homolog
         run: |
-          git checkout main
-          git pull origin main
+          git checkout master
+          git pull origin master
           git branch -D homolog || true
           git checkout -b homolog
           git cherry-pick origin/${{ github.head_ref }}

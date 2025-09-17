@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Pipeline Action</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 1.2rem; opacity: 0.9; }
+        main { padding: 3rem 0; }
+        .section { margin-bottom: 3rem; }
+        h2 { color: #667eea; margin-bottom: 1rem; font-size: 1.8rem; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0; }
+        .feature { background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea; }
+        .feature h3 { color: #333; margin-bottom: 0.5rem; }
+        .tech-stack { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+        .tech { background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; }
+        .workflows { background: #f8f9fa; padding: 2rem; border-radius: 8px; margin: 2rem 0; }
+        .workflow-item { margin: 1rem 0; padding: 1rem; background: white; border-radius: 4px; border-left: 3px solid #28a745; }
+        footer { background: #333; color: white; text-align: center; padding: 2rem 0; }
+        .github-link { display: inline-block; background: #333; color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 5px; margin-top: 1rem; }
+        .github-link:hover { background: #555; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CI/CD Pipeline Action</h1>
+            <p class="subtitle">Automação de Deploy com GitHub Actions</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="section">
+                <h2>Sobre o Projeto</h2>
+                <p>Este projeto demonstra a implementação de pipelines CI/CD usando GitHub Actions para automatizar o processo de integração contínua e deploy de aplicações Node.js com Express.</p>
+            </section>
+
+            <section class="section">
+                <h2>Tecnologias Utilizadas</h2>
+                <div class="tech-stack">
+                    <span class="tech">Node.js</span>
+                    <span class="tech">Express</span>
+                    <span class="tech">GitHub Actions</span>
+                    <span class="tech">ESLint</span>
+                    <span class="tech">CI/CD</span>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Funcionalidades</h2>
+                <div class="features">
+                    <div class="feature">
+                        <h3>🚀 Deploy Automatizado</h3>
+                        <p>Pipeline automatizado para deploy de aplicações API e Client</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🔍 Análise de Código</h3>
+                        <p>Verificação automática de qualidade de código com ESLint</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🌿 Múltiplos Ambientes</h3>
+                        <p>Suporte para ambientes de homologação e produção</p>
+                    </div>
+                    <div class="feature">
+                        <h3>📋 Templates</h3>
+                        <p>Template de Pull Request para padronização</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Workflows Configurados</h2>
+                <div class="workflows">
+                    <div class="workflow-item">
+                        <strong>ci-cd.api.yml</strong> - Pipeline para a aplicação API
+                    </div>
+                    <div class="workflow-item">
+                        <strong>ci-cd.client.yml</strong> - Pipeline para a aplicação Client
+                    </div>
+                    <div class="workflow-item">
+                        <strong>ci-cd.homolog.yml</strong> - Pipeline para ambiente de homologação
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Estrutura do Projeto</h2>
+                <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto;">
+├── .github/workflows/     # Configurações do GitHub Actions
+├── packages/apps/
+│   ├── api/              # Aplicação API
+│   └── client/           # Aplicação Client
+├── eslint.config.js      # Configuração do ESLint
+└── package.json          # Dependências do projeto</pre>
+            </section>
+
+            <div style="text-align: center;">
+                <a href="https://github.com" class="github-link">Ver no GitHub</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 CI/CD Pipeline Action - Projeto de Estudo</p>
+        </div>
+    </footer>
+</body>
+</html>

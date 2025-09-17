@@ -19,14 +19,46 @@ jobs:
             echo "homolog=false" >> $GITHUB_OUTPUT
           fi
 
-  validate-client:
+  detect-changes:
     needs: check-homolog
-    if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/client') }}
+    if: ${{ needs.check-homolog.outputs.homolog == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      run-client: ${{ steps.check.outputs.run_client }}
+      run-api: ${{ steps.check.outputs.run_api }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Detectar mudanças
+        id: check
+        run: |
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }})
+          echo "Arquivos alterados:"
+          echo "$CHANGED_FILES"
+
+          set_output() {
+            local name=$1
+            local pattern=$2
+            if echo "$CHANGED_FILES" | grep -qE "$pattern"; then
+              echo "$name=true" >> $GITHUB_OUTPUT
+            else
+              echo "$name=false" >> $GITHUB_OUTPUT
+            fi
+          }
+
+          set_output "run-client" "^packages/apps/client/"
+          set_output "run-api" "^packages/apps/api/"
+
+  validate-client:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.run-client == 'true' }}
     uses: ./.github/workflows/ci-cd.client.yml
 
   validate-api:
-    needs: check-homolog
-    if: ${{ needs.check-homolog.outputs.homolog == 'true' && contains(github.event.pull_request.labels.*.name, '@flux/api') }}
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.run-api == 'true' }}
     uses: ./.github/workflows/ci-cd.api.yml
 
   publish-homolog:

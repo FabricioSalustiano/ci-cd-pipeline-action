@@ -43,16 +43,16 @@ jobs:
           git config user.email "github-actions@github.com"
       - name: Rebase na master
         run: |
-          git fetch origin master
+          git fetch origin main
           git checkout ${{ github.head_ref }}
-          git rebase origin/master
+          git rebase origin/main
       - name: Push para a branch PR
         run: |
           git push origin ${{ github.head_ref }} --force-with-lease
       - name: Publicar em homolog
         run: |
-          git checkout master
-          git pull origin master
+          git checkout main
+          git pull origin main
           git branch -D homolog || true
           git checkout -b homolog
           git cherry-pick origin/${{ github.head_ref }}

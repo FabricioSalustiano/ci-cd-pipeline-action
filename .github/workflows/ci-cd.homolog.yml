@@ -26,15 +26,19 @@ jobs:
     outputs:
       run-client: ${{ steps.check.outputs.run_client }}
       run-api: ${{ steps.check.outputs.run_api }}
-
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Buscar master
+        run: git fetch origin master
+
       - name: Detectar mudanças
         id: check
         run: |
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }})
+          CHANGED_FILES=$(git diff --name-only origin/master...${GITHUB_HEAD_REF})
           echo "Arquivos alterados:"
           echo "$CHANGED_FILES"
 

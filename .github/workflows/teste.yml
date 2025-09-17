@@ -11,3 +11,15 @@ jobs:
       steps:
         - name: Checkout do código
           uses: actions/checkout@v3
+
+        - name: Verificar checkbox de homologação
+          id: check_body
+          run: |
+            echo "Body da PR:"
+            echo "${{ github.event.pull_request.body }}"
+
+            if echo "${{ github.event.pull_request.body }}" | grep -q "\- \[x\] Enviar para homologação?"; then
+              echo "HOMOLOG=true" >> $GITHUB_ENV
+            else
+              echo "HOMOLOG=false" >> $GITHUB_ENV
+            fi

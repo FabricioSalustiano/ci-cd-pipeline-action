@@ -3,6 +3,8 @@ name: CI-CD Homologation
 on:
   pull_request:
     types: [opened, synchronize, edited, labeled]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   check-homolog:
@@ -10,14 +12,25 @@ jobs:
     outputs:
       homolog: ${{ steps.set-homolog.outputs.homolog }}
     steps:
-      - name: Verificar checkbox de homologação
+      - name: Verificar número de aprovações
         id: set-homolog
-        run: |
-          if echo "${{ github.event.pull_request.body }}" | grep -iq "\- \[x\] Enviar para homologação?"; then
-            echo "homolog=true" >> $GITHUB_OUTPUT
-          else
-            echo "homolog=false" >> $GITHUB_OUTPUT
-          fi
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            const approvers = new Set(
+              reviews.filter(r => r.state === 'APPROVED')
+                     .map(r => r.user.login)
+            );
+            core.info(`Aprovadores: ${Array.from(approvers).join(', ')}`);
+            return approvers.size >= 2 ? 'true' : 'false';
 
   detect-changes:
     needs: check-homolog
@@ -66,30 +79,34 @@ jobs:
     uses: ./.github/workflows/ci-cd.api.yml
 
   publish-homolog:
-    needs: [validate-client, validate-api]
+    needs: [validate-client, validate-api, check-homolog]
     if: ${{ needs.check-homolog.outputs.homolog == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Configurar Git
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-      - name: Rebase na master
+
+      - name: Atualizar master e branch da PR
         run: |
-          git fetch origin master
+          git fetch origin
           git checkout ${{ github.head_ref }}
           git rebase origin/master
-      - name: Push para a branch PR
+
+      - name: Push branch PR rebaseada
         run: |
           git push origin ${{ github.head_ref }} --force-with-lease
-      - name: Publicar em homolog
+
+      - name: Publicar em homolog com cherry-pick
         run: |
           git checkout master
           git pull origin master
           git branch -D homolog || true
           git checkout -b homolog
-          git cherry-pick origin/${{ github.head_ref }}
+          git cherry-pick origin/master..origin/${{ github.head_ref }}
           git push origin homolog -f

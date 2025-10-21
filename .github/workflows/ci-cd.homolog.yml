@@ -30,6 +30,7 @@ jobs:
                      .map(r => r.user.login)
             );
             core.info(`Aprovadores: ${Array.from(approvers).join(', ')}`);
+            core.info(`approvers.size >= 2 ? 'true' : 'false'`);
             return approvers.size >= 2 ? 'true' : 'false';
 
   detect-changes:

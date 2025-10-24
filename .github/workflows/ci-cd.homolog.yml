@@ -7,13 +7,16 @@ on:
     types: [submitted]
 
 jobs:
-  check-homolog:
+  detect-changes:
     runs-on: ubuntu-latest
-    outputs:
-      homolog: ${{ steps.set-homolog.outputs.homolog }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
       - name: Verificar número de aprovações
-        id: set-homolog
+        id: verify
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -30,21 +33,13 @@ jobs:
                      .map(r => r.user.login)
             );
             core.info(`Aprovadores: ${Array.from(approvers).join(', ')}`);
-            core.info(approvers.size >= 2 ? 'true' : 'false');
             return approvers.size >= 2 ? 'true' : 'false';
 
-  detect-changes:
-    needs: check-homolog
-    if: ${{ needs.check-homolog.outputs.homolog == 'true' }}
-    runs-on: ubuntu-latest
-    outputs:
-      run-client: ${{ steps.check.outputs.run_client }}
-      run-api: ${{ steps.check.outputs.run_api }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
+      - name: Sair se não houver 2 aprovações
+        if: ${{ steps.verify.outputs.result != 'true' }}
+        run: |
+          echo "Menos de 2 aprovações. Encerrando pipeline."
+          exit 0
 
       - name: Buscar master
         run: git fetch origin master
@@ -69,6 +64,10 @@ jobs:
           set_output "run-client" "^packages/apps/client/"
           set_output "run-api" "^packages/apps/api/"
 
+    outputs:
+      run-client: ${{ steps.check.outputs.run_client }}
+      run-api: ${{ steps.check.outputs.run_api }}
+
   validate-client:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.run-client == 'true' }}
@@ -80,8 +79,7 @@ jobs:
     uses: ./.github/workflows/ci-cd.api.yml
 
   publish-homolog:
-    needs: [validate-client, validate-api, check-homolog]
-    if: ${{ needs.check-homolog.outputs.homolog == 'true' }}
+    needs: [validate-client, validate-api]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -103,7 +101,7 @@ jobs:
         run: |
           git push origin ${{ github.head_ref }} --force-with-lease
 
-      - name: Publicar em homolog com cherry-pick
+      - name: Publicar em homolog com cherry-pick (range de commits)
         run: |
           git checkout master
           git pull origin master
